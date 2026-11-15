@@ -1,5 +1,5 @@
 /*    CDSI69
-    Version : 2.15- octobre 2026
+    Version : 2.16- novembre 2026
     Fichier : package.json
 
     Auteurs :
@@ -268,6 +268,21 @@ if (suiviGPS) {
 
             longitudeGPS =
                 position.coords.longitude;
+
+// Premier centrage de la carte hors connexion sur le GPS
+if (
+    carteHorsLigne &&
+    !carteHorsLigneCentreeGPS &&
+    document.getElementById("cdsi_cartes").style.display !== "none"
+) {
+    carteHorsLigne.setView(
+        [latitudeGPS, longitudeGPS],
+        15
+    );
+
+    carteHorsLigneCentreeGPS = true;
+}
+
             horodatagePositionGPS =
     position.timestamp || Date.now();
 

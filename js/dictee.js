@@ -1,6 +1,6 @@
 
     /*CDSI69
-    Version : 2.15- octobre 2026
+    Version : 2.16- novembre 2026
     Fichier : package.json
 
     Auteurs :
@@ -57,7 +57,62 @@
             |__public
                 |__images
                 |__js 
+
+Dictée vocale :
+- Premier appui : démarrage de la dictée.
+- Le bouton devient rouge et affiche « Arrêter ».
+- Deuxième appui : arrêt manuel immédiat.
+- Arrêt automatique après 5 secondes sans parole reconnue.
+- Maintien du bouton rouge lors des interruptions automatiques.
+- Nouvelle tentative de reconnaissance si le navigateur coupe une session.
+- Arrêt après 5 secondes sans nouvelle parole reconnue.
+- Conservation du texte reconnu entre les sessions.
 */
+
+let dicteeActive = null;
+
+const DELAI_SILENCE_DICTEE = 5000;
+const DELAI_RELANCE_DICTEE = 500;
+
+
+// Arrêt global : accessible aussi depuis le deuxième appui sur le bouton.
+function arreterDictee(etatDict, silence) {
+    if (!etatDict || etatDict.termine) return;
+
+    etatDict.arretDemande = true;
+
+    if (silence) {
+        etatDict.silenceAtteint = true;
+    }
+
+    if (etatDict.minuterieSilence !== null) {
+        clearTimeout(etatDict.minuterieSilence);
+        etatDict.minuterieSilence = null;
+    }
+
+    if (etatDict.minuterieRelance !== null) {
+        clearTimeout(etatDict.minuterieRelance);
+        etatDict.minuterieRelance = null;
+    }
+
+    if (etatDict.reconnaissance) {
+        try {
+            etatDict.reconnaissance.stop();
+        } catch (erreur) {
+            if (etatDict.terminerDictee) {
+                etatDict.terminerDictee();
+            }
+        }
+    } else if (etatDict.terminerDictee) {
+        etatDict.terminerDictee();
+    }
+}
+
+
+// ---------------------------------------------------------
+// DICTÉE D'UN CHAMP
+// ---------------------------------------------------------
+
 function dicterTexte(idChamp) {
 
     const champ = document.getElementById(idChamp);
@@ -72,9 +127,20 @@ function dicterTexte(idChamp) {
             idChamp.slice(1));
 
     if (idChamp === "nouveauCommentairePhoto") {
-        bouton =
-            document.getElementById("btnDicteePhoto");
+        bouton = document.getElementById("btnDicteePhoto");
     }
+
+
+    // Si une dictée est déjà en cours, arrêter.
+    if (dicteeActive) {
+        arreterDictee(dicteeActive, false);
+        return;
+    }
+
+
+    // -----------------------------------------------------
+    // DÉMARRAGE DE LA DICTÉE
+    // -----------------------------------------------------
 
     const lancerDictee = function(mode) {
 
@@ -83,127 +149,352 @@ function dicterTexte(idChamp) {
             window.webkitSpeechRecognition;
 
         if (!SpeechRecognition) {
-
             alert(
                 "La reconnaissance vocale n'est pas disponible sur ce navigateur."
             );
-
             return;
         }
 
-        const texteAvant = champ.value;
+        const texteInitial = champ.value;
 
-        const reconnaissance = new SpeechRecognition();
+        const etat = {
+            champ: champ,
+            bouton: bouton,
+            reconnaissance: null,
 
-        reconnaissance.lang = "fr-FR";
-        reconnaissance.interimResults = true;
-        reconnaissance.continuous = false;
+            // Texte déjà présent avant la dictée.
+            texteBase: mode === "ajouter"
+                ? texteInitial.trim()
+                : "",
 
-        // =====================================================
-        // DÉBUT DE L'ÉCOUTE
-        // =====================================================
+            // Texte reconnu pendant la session en cours.
+            texteSession: "",
 
-        if (bouton) {
+            minuterieSilence: null,
+            minuterieRelance: null,
+            demarrageEnCours: false,
+            dernierTexteSession: "",
 
-            bouton.textContent = "🎤 Écoute...";
-            bouton.disabled = true;
+            arretDemande: false,
+            silenceAtteint: false,
+            erreurFatale: false,
+            termine: false,
+
+            styleBoutonInitial: bouton ? {
+                backgroundColor: bouton.style.backgroundColor,
+                color: bouton.style.color,
+                borderColor: bouton.style.borderColor
+            } : null
+        };
+
+        // Séparation entre l'ancien texte et le nouveau.
+        if (mode === "ajouter" && etat.texteBase !== "") {
+            etat.texteBase += " ";
         }
 
-        // =====================================================
-        // TEXTE RECONNU
-        // =====================================================
+        dicteeActive = etat;
 
-        reconnaissance.onresult = function(event) {
 
-            let texte = "";
+        // -------------------------------------------------
+        // AFFICHAGE DU BOUTON ROUGE
+        // -------------------------------------------------
 
-            for (
-                let i = event.resultIndex;
-                i < event.results.length;
-                i++
-            ) {
+        if (bouton) {
+            bouton.textContent = "⏹ Arrêter";
+            bouton.disabled = false;
+            bouton.style.backgroundColor = "#c62828";
+            bouton.style.color = "#ffffff";
+            bouton.style.borderColor = "#c62828";
+            bouton.setAttribute("aria-pressed", "true");
+        }
 
-                texte +=
-                    event.results[i][0].transcript;
-            }
 
-            if (mode === "ajouter") {
+        // -------------------------------------------------
+        // AFFICHAGE DU TEXTE DANS LE CHAMP
+        // -------------------------------------------------
 
-                champ.value =
-                    texteAvant.trim()
-                        ? texteAvant.trim() + " " + texte.trim()
-                        : texte.trim();
+        function afficherTexte() {
 
-            } else {
-
-                champ.value = texte.trim();
-            }
+            champ.value =
+                etat.texteBase + etat.texteSession;
 
             champ.dispatchEvent(
-                new Event("input", {
-                    bubbles: true
-                })
+                new Event("input", { bubbles: true })
             );
 
             champ.dispatchEvent(
-                new Event("change", {
-                    bubbles: true
-                })
+                new Event("change", { bubbles: true })
             );
+        }
 
-        };
 
-        // =====================================================
-        // FIN DE L'ÉCOUTE
-        // =====================================================
+        // -------------------------------------------------
+        // ANNULATION DES MINUTERIES
+        // -------------------------------------------------
 
-        reconnaissance.onend = function() {
+        function annulerMinuterieSilence() {
+
+            if (etat.minuterieSilence !== null) {
+                clearTimeout(etat.minuterieSilence);
+                etat.minuterieSilence = null;
+            }
+        }
+
+        function annulerMinuterieRelance() {
+
+            if (etat.minuterieRelance !== null) {
+                clearTimeout(etat.minuterieRelance);
+                etat.minuterieRelance = null;
+            }
+        }
+
+
+        // -------------------------------------------------
+        // GESTION DU SILENCE
+        // -------------------------------------------------
+
+        function relancerMinuterieSilence() {
+
+            annulerMinuterieSilence();
+
+            etat.minuterieSilence = setTimeout(function() {
+
+                console.log(
+                    "CDSI69 : 5 secondes sans parole reconnue."
+                );
+
+                arreterDictee(etat, true);
+
+            }, DELAI_SILENCE_DICTEE);
+        }
+
+
+        // -------------------------------------------------
+        // FIN DÉFINITIVE DE LA DICTÉE
+        // -------------------------------------------------
+
+        function terminerDictee() {
+
+            if (etat.termine) {
+                return;
+            }
+
+            etat.termine = true;
+
+            annulerMinuterieSilence();
+            annulerMinuterieRelance();
 
             if (bouton) {
 
                 bouton.textContent = "🎤 Dicter";
                 bouton.disabled = false;
+
+                bouton.style.backgroundColor =
+                    etat.styleBoutonInitial.backgroundColor;
+
+                bouton.style.color =
+                    etat.styleBoutonInitial.color;
+
+                bouton.style.borderColor =
+                    etat.styleBoutonInitial.borderColor;
+
+                bouton.setAttribute("aria-pressed", "false");
             }
 
-        };
-
-        // =====================================================
-        // ERREUR
-        // =====================================================
-
-        reconnaissance.onerror = function(event) {
-
-            console.log(
-                "CDSI69 - Erreur reconnaissance vocale :",
-                event.error
-            );
-
-            if (bouton) {
-
-                bouton.textContent = "🎤 Dicter";
-                bouton.disabled = false;
+            if (dicteeActive === etat) {
+                dicteeActive = null;
             }
 
-        };
+            afficherTexte();
+        }
 
-        reconnaissance.start();
+        etat.terminerDictee = terminerDictee;
+
+
+        // L’arrêt est assuré par la fonction globale arreterDictee().
+
+
+        // -------------------------------------------------
+        // CRÉATION ET DÉMARRAGE D'UNE SESSION
+        // -------------------------------------------------
+
+        function programmerRelance() {
+
+            if (etat.termine ||
+                etat.arretDemande ||
+                etat.silenceAtteint ||
+                etat.erreurFatale) {
+                return;
+            }
+
+            if (etat.minuterieRelance !== null) {
+                clearTimeout(etat.minuterieRelance);
+            }
+
+            etat.minuterieRelance = setTimeout(function() {
+                etat.minuterieRelance = null;
+                demarrerReconnaissance();
+            }, DELAI_RELANCE_DICTEE);
+        }
+
+
+        function demarrerReconnaissance() {
+
+            if (etat.termine ||
+                etat.arretDemande ||
+                etat.silenceAtteint ||
+                etat.erreurFatale) return;
+
+            if (etat.demarrageEnCours || etat.reconnaissance) return;
+
+            const reconnaissance = new SpeechRecognition();
+
+            etat.reconnaissance = reconnaissance;
+            etat.demarrageEnCours = true;
+
+            reconnaissance.lang = "fr-FR";
+            reconnaissance.interimResults = true;
+            reconnaissance.continuous = true;
+
+            reconnaissance.onstart = function() {
+                etat.demarrageEnCours = false;
+            };
+
+            reconnaissance.onresult = function(event) {
+
+                let texte = "";
+
+                for (let i = 0; i < event.results.length; i++) {
+                    texte += event.results[i][0].transcript;
+                }
+
+                etat.texteSession = texte;
+
+                afficherTexte();
+
+                // Le délai repart seulement lorsque la transcription évolue.
+                if (texte.trim() !== "" &&
+                    texte !== etat.dernierTexteSession) {
+
+                    etat.dernierTexteSession = texte;
+                    relancerMinuterieSilence();
+                }
+            };
+
+            reconnaissance.onend = function() {
+
+                if (etat.reconnaissance !== reconnaissance) return;
+
+                etat.reconnaissance = null;
+                etat.demarrageEnCours = false;
+
+                // Sauvegarder le texte de cette session avant la relance.
+                if (etat.texteSession.trim() !== "") {
+
+                    if (etat.texteBase !== "" &&
+                        !/\s$/.test(etat.texteBase)) {
+
+                        etat.texteBase += " ";
+                    }
+
+                    etat.texteBase += etat.texteSession;
+                }
+
+                etat.texteSession = "";
+                etat.dernierTexteSession = "";
+
+                afficherTexte();
+
+                if (etat.arretDemande ||
+                    etat.silenceAtteint ||
+                    etat.erreurFatale) {
+
+                    terminerDictee();
+                    return;
+                }
+
+                // Le navigateur a coupé une session,
+                // mais la dictée continue.
+                console.log(
+                    "CDSI69 : interruption automatique, nouvelle tentative."
+                );
+
+                programmerRelance();
+            };
+
+            reconnaissance.onerror = function(event) {
+
+                console.log(
+                    "CDSI69 - Erreur reconnaissance vocale :",
+                    event.error
+                );
+
+                const erreursFatales = [
+                    "not-allowed",
+                    "service-not-allowed",
+                    "audio-capture",
+                    "language-not-supported"
+                ];
+
+                if (erreursFatales.includes(event.error)) {
+
+                    etat.erreurFatale = true;
+
+                    if (etat.minuterieSilence !== null) {
+                        clearTimeout(etat.minuterieSilence);
+                        etat.minuterieSilence = null;
+                    }
+                }
+
+                // Les erreurs temporaires seront traitées par onend.
+            };
+
+            try {
+
+                reconnaissance.start();
+
+            } catch (erreur) {
+
+                console.log(
+                    "CDSI69 - Démarrage impossible, nouvelle tentative :",
+                    erreur
+                );
+
+                if (etat.reconnaissance === reconnaissance) {
+                    etat.reconnaissance = null;
+                }
+
+                etat.demarrageEnCours = false;
+
+                programmerRelance();
+            }
+        }
+
+
+        // -------------------------------------------------
+        // LANCEMENT INITIAL
+        // -------------------------------------------------
+
+        // Le délai démarre dès le lancement de la dictée.
+        relancerMinuterieSilence();
+
+        demarrerReconnaissance();
     };
 
 
-    // =====================================================
+    // -----------------------------------------------------
     // SI LE CHAMP EST VIDE : DICTÉE DIRECTE
-    // =====================================================
+    // -----------------------------------------------------
 
     if (champ.value.trim() === "") {
-
         lancerDictee("remplacer");
         return;
     }
 
 
-    // =====================================================
+    // -----------------------------------------------------
     // LE CHAMP CONTIENT DÉJÀ DU TEXTE
-    // =====================================================
+    // -----------------------------------------------------
 
     const fond = document.createElement("div");
 
@@ -231,7 +522,8 @@ function dicterTexte(idChamp) {
 
     const titre = document.createElement("h3");
 
-    titre.textContent = "📝 Ce champ contient déjà du texte";
+    titre.textContent =
+        "📝 Ce champ contient déjà du texte";
 
     titre.style.marginTop = "0";
 
@@ -255,51 +547,49 @@ function dicterTexte(idChamp) {
     boutonAnnuler.type = "button";
     boutonAnnuler.textContent = "❌ Annuler";
 
+    [
+        boutonAjouter,
+        boutonRemplacer,
+        boutonAnnuler
+    ].forEach(function(boutonDialogue) {
 
-    [boutonAjouter, boutonRemplacer, boutonAnnuler].forEach(
-        function(boutonDialogue) {
-
-            boutonDialogue.style.width = "100%";
-            boutonDialogue.style.padding = "12px";
-            boutonDialogue.style.marginTop = "10px";
-            boutonDialogue.style.boxSizing = "border-box";
-
-        }
-    );
-
-
-    boutonAjouter.addEventListener(
-        "click",
-        function() {
-
-            document.body.removeChild(fond);
-
-            lancerDictee("ajouter");
-
-        }
-    );
+        boutonDialogue.style.width = "100%";
+        boutonDialogue.style.padding = "12px";
+        boutonDialogue.style.marginTop = "10px";
+        boutonDialogue.style.boxSizing = "border-box";
+    });
 
 
-    boutonRemplacer.addEventListener(
-        "click",
-        function() {
+    // -----------------------------------------------------
+    // CHOIX : AJOUTER À LA SUITE
+    // -----------------------------------------------------
 
-            document.body.removeChild(fond);
+    boutonAjouter.addEventListener("click", function() {
 
-            lancerDictee("remplacer");
+        document.body.removeChild(fond);
+        lancerDictee("ajouter");
+    });
 
-        }
-    );
+
+    // -----------------------------------------------------
+    // CHOIX : REMPLACER
+    // -----------------------------------------------------
+
+    boutonRemplacer.addEventListener("click", function() {
+
+        document.body.removeChild(fond);
+        lancerDictee("remplacer");
+    });
 
 
-    boutonAnnuler.addEventListener(
-        "click",
-        function() {
+    // -----------------------------------------------------
+    // CHOIX : ANNULER
+    // -----------------------------------------------------
 
-            document.body.removeChild(fond);
+    boutonAnnuler.addEventListener("click", function() {
 
-        }
-    );
+        document.body.removeChild(fond);
+    });
 
 
     boite.appendChild(titre);
@@ -311,141 +601,93 @@ function dicterTexte(idChamp) {
     fond.appendChild(boite);
 
     document.body.appendChild(fond);
-
 }
-document
-    .getElementById("btnDicteePoiPov")
-    .addEventListener(
-        "click",
-        function() {
 
-            dicterTexte("poiPov");
 
-        }
+// ---------------------------------------------------------
+// BOUTONS DE DICTÉE
+// ---------------------------------------------------------
 
-        
-    );
-
-document
-    .getElementById("btnDicteeObsNuisance")
-    .addEventListener(
-        "click",
-        function() {
-
-            dicterTexte("obsNuisance");
-
-        }
-    );
-
-document
-.getElementById("btnDicteeAutreSignaletique")
-.addEventListener(
-"click",
-function() {
-
-    dicterTexte("signaletiqueAutre");
-
-}
+document.getElementById("btnDicteePoiPov").addEventListener(
+    "click",
+    function() {
+        dicterTexte("poiPov");
+    }
 );
 
-
-document
-.getElementById("btnDicteeAutreSecurite")
-.addEventListener(
-"click",
-function() {
-
-    dicterTexte("securiteAutre");
-
-}
+document.getElementById("btnDicteeObsNuisance").addEventListener(
+    "click",
+    function() {
+        dicterTexte("obsNuisance");
+    }
 );
 
-
-document
-.getElementById("btnDicteeAutreNuisance")
-.addEventListener(
-"click",
-function() {
-
-    dicterTexte("autreNuisance");
-
-}
+document.getElementById("btnDicteeAutreSignaletique").addEventListener(
+    "click",
+    function() {
+        dicterTexte("signaletiqueAutre");
+    }
 );
 
-document
-    .getElementById("btnDicteePasAPas")
-    .addEventListener(
-        "click",
-        function() {
+document.getElementById("btnDicteeAutreSecurite").addEventListener(
+    "click",
+    function() {
+        dicterTexte("securiteAutre");
+    }
+);
 
-            dicterTexte("pasAPas");
+document.getElementById("btnDicteeAutreNuisance").addEventListener(
+    "click",
+    function() {
+        dicterTexte("autreNuisance");
+    }
+);
 
-        }
-    ); 
+document.getElementById("btnDicteePasAPas").addEventListener(
+    "click",
+    function() {
+        dicterTexte("pasAPas");
+    }
+);
 
-document
-    .getElementById("btnDicteeNomTrace")
-    .addEventListener(
-        "click",
-        function() {
+document.getElementById("btnDicteeNomTrace").addEventListener(
+    "click",
+    function() {
+        dicterTexte("nomTrace");
+    }
+);
 
-            dicterTexte("nomTrace");
+document.getElementById("btnDicteeCommuneDepart").addEventListener(
+    "click",
+    function() {
+        dicterTexte("communeDepart");
+    }
+);
 
-        }
-    );  
-    
-    document
-    .getElementById("btnDicteeCommuneDepart")
-    .addEventListener(
-        "click",
-        function() {
+document.getElementById("btnDicteeLieuDepart").addEventListener(
+    "click",
+    function() {
+        dicterTexte("lieuDepart");
+    }
+);
 
-            dicterTexte("communeDepart");
+document.getElementById("btnDicteeAccesDepart").addEventListener(
+    "click",
+    function() {
+        dicterTexte("accesDepart");
+    }
+);
 
-        }
-    );
+document.getElementById("btnDicteePhoto").addEventListener(
+    "click",
+    function() {
+        dicterTexte("nouveauCommentairePhoto");
+    }
+);
 
-    document
-    .getElementById("btnDicteeLieuDepart")
-    .addEventListener(
-        "click",
-        function() {
-
-            dicterTexte("lieuDepart");
-
-        }
-    );
-
-    document
-    .getElementById("btnDicteeAccesDepart")
-    .addEventListener(
-        "click",
-        function() {
-
-            dicterTexte("accesDepart");
-
-        }
-    );
-
-  // =====================================================
-    // 20-08--06h39
-    // =====================================================
-
-    document
-    .getElementById("btnDicteePhoto")
-    .addEventListener(
-        "click",
-        function() {
-
-            dicterTexte("nouveauCommentairePhoto");
-
-        }
-    );
-    document
-    .getElementById("btnDicteeCommentairePhoto")
-    .addEventListener(
-        "click",
-        function() {
-            dicterTexte("commentairePhoto");
-        }
-    );
+document.getElementById("btnDicteeCommentairePhoto").addEventListener(
+    "click",
+    function() {
+        dicterTexte("commentairePhoto");
+    }
+);

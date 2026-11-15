@@ -1,6 +1,6 @@
 /*
     CDSI69
-    Version : 2.15- octobre 2026
+    Version : 2.16- novembre 2026
     Fichier : package.json
 
     Auteurs :

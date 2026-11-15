@@ -1,6 +1,6 @@
 /*
     CDSI69
-    Version : 2.11
+    Version : 2.16
     Fichier : package.json
 
     Auteurs :

@@ -14,8 +14,10 @@ const FICHIERS_A_METTRE_EN_CACHE = [
     // CSS
     "./css/style.css",
     "./css/leaflet.css",
+    "./lib/leaflet.draw-src.css",
 
     // JavaScript CDSI69
+    "./lib/leaflet.draw.js",
     "./js/app.js",
     "./js/carte.js",
     "./js/debug.js",
@@ -33,9 +35,19 @@ const FICHIERS_A_METTRE_EN_CACHE = [
     "./js/xlsx.bundle.js",
     "./js/xlsx.full.min.js",
 
-    // Icônes
-    "./icones/icon-192.png",
-    "./icones/icon-512.png"
+   // Icônes CDSI69
+"./icones/icon-192.png",
+"./icones/icon-512.png",
+
+// Images Leaflet.draw
+"./lib/images/layers.png",
+"./lib/images/layers-2x.png",
+"./lib/images/marker-icon.png",
+"./lib/images/marker-icon-2x.png",
+"./lib/images/marker-shadow.png",
+"./lib/images/spritesheet.png",
+"./lib/images/spritesheet.svg",
+"./lib/images/spritesheet-2x.png"
 
 ];
 
@@ -117,12 +129,57 @@ self.addEventListener("activate", function(event) {
 // INTERCEPTION DES REQUÊTES
 // -------------------------------------------------
 
+
 self.addEventListener("fetch", function(event) {
+    
 
     if (event.request.method !== "GET") {
         return;
     }
 
+    // Identifier les tuiles cartographiques IGN
+    const estTuileIGN =
+        event.request.url.startsWith("https://data.geopf.fr/wmts");
+
+    // CAS 1 : TUILES CARTOGRAPHIQUES IGN
+    if (estTuileIGN) {
+        console.log("SERVICE WORKER : demande de tuile IGN", event.request.url);
+
+        event.respondWith(
+
+            caches.open(CACHE_CARTES_NAME)
+                .then(function(cache) {
+
+                    // On cherche d'abord la tuile dans le cache IGN
+                    return cache.match(event.request)
+                        .then(function(reponseCache) {
+
+                            if (reponseCache) {
+                                return reponseCache;
+                            }
+
+                            // Tuile absente : demande au réseau
+                            return fetch(event.request)
+                                .then(function(reponseReseau) {
+
+                                    if (reponseReseau && reponseReseau.ok) {
+
+                                        cache.put(
+                                            event.request,
+                                            reponseReseau.clone()
+                                        );
+                                    }
+
+                                    return reponseReseau;
+                                });
+                        });
+                })
+        );
+
+        return;
+    }
+
+    // CAS 2 : FICHIERS DE L'APPLICATION CDSI69
     event.respondWith(
 
         // On essaie d'abord le réseau
@@ -131,7 +188,7 @@ self.addEventListener("fetch", function(event) {
             .then(function(reponseReseau) {
 
                 // Si la réponse est correcte,
-                // on met à jour le cache
+                // on met à jour le cache de l'application
                 if (reponseReseau && reponseReseau.ok) {
 
                     const copieReponse =
@@ -146,11 +203,10 @@ self.addEventListener("fetch", function(event) {
                             );
 
                         });
-
                 }
 
                 return reponseReseau;
-                           })
+            })
 
             .catch(function() {
 
@@ -161,27 +217,16 @@ self.addEventListener("fetch", function(event) {
                     .then(function(reponseCache) {
 
                         if (reponseCache) {
-
                             return reponseCache;
-
                         }
 
                         // Pour la navigation hors connexion,
                         // retour à la page principale
-                        if (
-                            event.request.mode === "navigate"
-                        ) {
+                        if (event.request.mode === "navigate") {
 
-                            return caches.match(
-                                "./index.html"
-                            );
-
+                            return caches.match("./index.html");
                         }
-
                     });
-
             })
-
     );
-
 });

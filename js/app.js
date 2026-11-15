@@ -1,5 +1,5 @@
 /*    CDSI69
-    Version : 2.15- octobre 2026
+    Version : 2.16- novembre 2026
     Fichier : package.json
 
     Auteurs :
@@ -1899,6 +1899,42 @@ document
         }
 
     }); 
+
+    // =====================================
+// ÉCRAN CARTES HORS CONNEXION
+// =====================================
+
+document.getElementById("btnCartesHorsLigne")
+    .addEventListener("click", function () {
+
+        prep.style.display = "none";
+        collecte.style.display = "none";
+
+        document.getElementById("cdsi_cartes").style.display = "block";
+
+        // Création de la carte IGN hors connexion
+        initialiserCarteHorsLigne();
+
+        // Ajustement de la carte après son affichage
+        setTimeout(function () {
+            carteHorsLigne.invalidateSize();
+        }, 200);
+
+    });
+
+
+// Retour à l'accueil depuis les cartes hors connexion
+
+document.getElementById("btnRetourCartes")
+    .addEventListener("click", function () {
+
+        document.getElementById("cdsi_cartes").style.display = "none";
+
+        prep.style.display = "block";
+
+        majInterface();
+
+    });
 
     // -------------------------------------------------
 // SERVICE WORKER

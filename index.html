@@ -1,6 +1,6 @@
 <!--
     CDSI69
-    Version : 2.15- octobre 2026
+    Version : 2.16- novembre 2026
     Fichier : package.json
 
     Auteurs :
@@ -67,10 +67,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>CDSI69 V2.14</title>
+<title>CDSI69 V2.16</title>
 <link rel="stylesheet" href="css/style.css?v=2">
 <link rel="manifest" href="manifest.json">
 <link rel="stylesheet" href="css/leaflet.css?v=2">
+<link rel="stylesheet" href="lib/leaflet.draw-src.css?v=1">
 <link rel="icon" type="image/png" sizes="192x192"
       href="icones/icon-192.png">
 
@@ -98,14 +99,20 @@
         class="btnAide">
         🗺️ Plan IGN
     </button>
-    
+     <button
+            type="button"
+            id="btnCartesHorsLigne">
+            🗺️ Cartes hors connexion
+        </button>
 
-</div>
+    </div>
+
+  
 
     <header>
         
 
-   <h1 id="titreAccueil">
+  <h1 id="titreAccueil">
 
     <img
         src="icones/icon-50.png"
@@ -113,7 +120,7 @@
         class="logoTitre">
 
     CDSI69-Collecte
-    <span class="versionCDSI">V2.15.2</span>
+    <span class="versionCDSI">V2.16</span>
 
 </h1>
 
@@ -202,7 +209,121 @@
 
     <button id="btnCommencer" disabled>▶ Commencer</button>
 
-   
+</div>
+
+<!-- =====================================
+     ÉCRAN CARTES HORS CONNEXION
+     =====================================-->
+
+<div id="cdsi_cartes" style="display:none;">
+
+    <h2>🗺️ Cartes hors connexion</h2>
+
+    <button
+        type="button"
+        id="btnRetourCartes">
+        ⬅ Retour à l'accueil
+    </button>
+
+    <p>
+        Préparation des cartes IGN pour une utilisation
+        sans connexion Internet.
+    </p>
+
+<div id="choixMethodeCartes" style="margin:15px 0;">
+
+    <strong>Comment souhaitez-vous préparer vos cartes ?</strong>
+
+    <div style="margin:12px 0;">
+        <button type="button" id="btnChoixGPX">
+            Préparer à partir d'un parcours GPX
+        </button>
+        <button type="button" id="btnChoixManuel">
+            Dessiner une zone manuellement
+        </button>
+    </div>
+
+    <div id="importGPXHorsLigne" style="display:none; margin-top:15px;">
+
+        <p>
+            Sélectionnez un fichier GPX. CDSI69 calculera une
+            zone de 300 m de chaque côté du parcours.
+        </p>
+
+        <input
+            type="file"
+            id="gpxHorsLigne"
+            accept=".gpx">
+
+        <div id="infosGPXHorsLigne" style="margin-top:10px;">
+        </div>
+
+    </div>
+
+</div>
+
+    <div id="carteHorsLigne"></div>
+    <div id="dimensionsZone" style="margin:10px 0; font-weight:bold;">
+    Aucune zone sélectionnée
+    </div>
+
+    <div id="choixZoom" style="margin:15px 0;">
+
+        <strong>Échelles des cartes à télécharger :</strong>
+
+        
+        <label>
+            <input type="checkbox" value="14" checked disabled>
+            1/25 000 (obligatoire)
+        </label>
+
+        <label>
+            <input type="checkbox" value="15" checked>
+            1/12 500
+        </label>
+
+        <label>
+            <input type="checkbox" value="16" checked>
+            1/6 250
+        </label>
+
+        <label>
+            <input type="checkbox" value="17" checked>
+            1/3 125
+        </label>
+
+        <label>
+            <input type="checkbox" value="18">
+            1/1 560 (facultatif)
+        </label>
+    </div>
+
+    <div id="estimationCartes" style="margin:15px 0;">
+
+        <button type="button" id="btnEstimerCartes">
+          Calculer le nombre de tuiles
+        </button>
+
+        <div id="resultatEstimation" style="margin-top:10px;">
+        </div>
+    </div>
+
+    <div id="telechargementCartes" style="margin:15px 0;">
+
+        <button type="button" id="btnTelechargerCartes">
+            Télécharger les cartes
+        </button>
+        <button
+            type="button"
+            id="btnPauseCartes"
+            disabled>
+            Pause
+       </button>
+        <div id="progressionCartes" style="margin-top:10px;">
+            En attente du téléchargement.
+        </div>
+
+    </div>
 
 </div>
 
@@ -245,6 +366,16 @@
     </div>
 </div>
 
+
+<div id="messageZoomHorsLigne"
+     style="display:none;
+            background:#fff3cd;
+            color:#856404;
+            padding:10px;
+            margin:10px 0;
+            border:1px solid #ffeeba;
+            border-radius:5px;">
+</div>
 
 <div id="carte"
      style="height:450px;border:1px solid #999;margin:10px 0">
@@ -936,7 +1067,9 @@ window.onerror = function(message, source, lineno, colno, erreur) {
 </script>
 
 <script src="js/leaflet.js?v=20260825"></script>
+<script src="lib/leaflet.draw.js?v=1"></script>
 <script src="js/leaflet-omnivore.min.js?v=20260825"></script>
+<script src="lib/turf.min.js"></script>
 <script src="js/carte.js?v=20260825"></script>
 <script src="js/gpx.js?v=20260825"></script>
 <script src="js/gps.js?v=20260825"></script>
