@@ -76,7 +76,9 @@ const DELAI_RELANCE_DICTEE = 500;
 
 
 // Arrêt global : accessible aussi depuis le deuxième appui sur le bouton.
+// Arrêt global : accessible aussi depuis le deuxième appui sur le bouton.
 function arreterDictee(etatDict, silence) {
+
     if (!etatDict || etatDict.termine) return;
 
     etatDict.arretDemande = true;
@@ -97,7 +99,7 @@ function arreterDictee(etatDict, silence) {
 
     if (etatDict.reconnaissance) {
         try {
-            etatDict.reconnaissance.stop();
+            etatDict.reconnaissance.abort();
         } catch (erreur) {
             if (etatDict.terminerDictee) {
                 etatDict.terminerDictee();
