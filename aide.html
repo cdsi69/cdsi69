@@ -102,6 +102,23 @@ Push origin<!--
     border-radius: 8px;
 }
 
+.icone-outil {
+    display: inline-block;
+    width: 26px;
+    height: 26px;
+    vertical-align: middle;
+    background-image: url('images/spritesheet.svg');
+    background-repeat: no-repeat;
+    background-size: 300px 30px;
+}
+
+.icone-rectangle {
+    background-position: -62px -2px;
+}
+
+.icone-modifier {
+    background-position: -152px -2px;
+}
     </style>
 
 </head>
@@ -168,15 +185,25 @@ Deux méthodes vous sont proposées pour définir la zone à préparer.
 Choisissez cette méthode si vous souhaitez préparer une zone géographique sans disposer d'un fichier GPX.
 Sur la carte, dessinez un rectangle qui couvre le secteur dans lequel vous allez randonner.
 L'application utilise cette zone pour déterminer les cartes à télécharger.<br><br>
+</p>
+<p>
 C'est assez simple :<br>
-Pour définir la zone touchez le petit bouton carré noir à gauche et dessinez avec le doigt un carré correspondant 
-à la surface que vous voulez télécharger. Puis, pour l'agrandir ou le déplacer, touchez le carré blanc qui va ajouter
-des repères aux angles de ce carré vous permettant de le redimensionner et un autre repère au centre pour le déplacer.
-Touchez ensuite sur "Save". Descendez en dessous de la carte et cochez le niveau de zoom que vous désirez - par défaut l'échelle 1/25 000 est retenue,
- vous pouvez selectionner ou supprimer des échelles plus petites (plus vous en sélectionnez, plus le nombre de tuiles va augmenter.).Calculez le nombre 
- de tuiles. Descendez encore et téléchargez les tuiles. Les tuiles se chargent (ce peut-être long, patientez jusqu'à atteindre 100%) -Si des tuiles sont en erreur
- relancez le téléchargement jusqu'à les avoir à 100%.<br>
- Vous pouvez revenir à l'acceuil puis passer dans les fenêtres de collecte.
+Pour définir la zone touchez le petit bouton
+<span class="icone-outil icone-rectangle"></span>
+à gauche et dessinez avec le doigt un carré correspondant
+à la surface que vous voulez télécharger. Puis, pour l'agrandir ou le déplacer,
+touchez le bouton
+<span class="icone-outil icone-modifier"></span>
+qui va ajouter des repères aux angles de ce carré vous permettant de le redimensionner
+et un autre repère au centre pour le déplacer.
+Touchez ensuite sur "Save". Descendez en dessous de la carte et cochez le niveau de zoom
+que vous désirez - par défaut l'échelle 1/25 000 est retenue,
+vous pouvez sélectionner ou supprimer des échelles plus petites
+(plus vous en sélectionnez, plus le nombre de tuiles va augmenter).
+Calculez le nombre de tuiles. Descendez encore et téléchargez les tuiles.
+Les tuiles se chargent (ce peut être long, patientez jusqu'à atteindre 100%).
+Si des tuiles sont en erreur, relancez le téléchargement jusqu'à les avoir à 100%.<br>
+C'est tout. Vous pouvez revenir à l'accueil puis passer dans les fenêtres de collecte.
 </p>
 
 <p>
