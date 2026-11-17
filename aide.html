@@ -136,19 +136,24 @@
     Cette application a pour ambition de vous aider à collecter un nouvel itinéraire, que ce soit en suivant une trace GPX qui a été déterminée
      (et chargée sur le téléphone) au préalable ou qui sera créée au fur et à mesure de votre progression.<br>
     Elle vous permettra également de reprendre une collecte interrompue (volontairement ou non).<br>
-    Vous obtiendrez, à la fin de la collecte, un fichier .ZIP contenant plusieurs fichiers :<br> 
-    - un fichier .gpx comprenant les données enregistrées pour chaque waypoint,<br> <br>
-    - un fichier .xlsx semblable à la feuille de collecte augmenté : <br>
-       - du calcul automatique des distances, <br>
-       - des dénivelés (approximatifs), <br>
-       - des pourcentages des parties en agglomération et hors agglomération, <br>
-       - ainsi des pourcentages des parties revêtues et non revêtues,<br>
-       - la position GPS des waypoints avec le rappel de la position du waypoint de départ en haut du fichier <br>  
-       - (l'indice IBP n'est pas calculé car trop délicat à mettre en oeuvre).<br><br>
-    - un fichier .cdsi69 qui contiendra toutes les données de la collecte permettant de repartir pour éventuellement reprendre et prolonger cette collecte.<br><br>
-    - et un sous-dossier "Photos" comprenant toutes les photos prises à partir d'un waypoint avec leurs commentaires et l'indication du waypoint auquel elles
-      sont rattachées.<br><br>
-    - Prévoir une batterie additionnelle ne sera pas un luxe inutile.
+    Vous obtiendrez, à la fin de la collecte, un fichier .ZIP contenant plusieurs fichiers :
+     <p style="padding-left: 20px;">
+        - un fichier .gpx comprenant les données enregistrées pour chaque waypoint,<br>
+        - un fichier .xlsx semblable à la feuille de collecte augmenté du calcul automatique des distances, <br>
+        - des dénivelés (approximatifs), <br>
+        - des pourcentages des parties en agglomération et hors agglomération, <br>
+        - ainsi des pourcentages des parties revêtues et non revêtues,<br>
+        - la position GPS des waypoints avec le rappel de la position du waypoint de départ en haut du fichier <br>  
+        - un fichier .cdsi69 qui contiendra toutes les données de la collecte permettant de repartir pour éventuellement reprendre et prolonger 
+    cette collecte.<br>
+        - et un sous-dossier "Photos" comprenant toutes les photos prises à partir d'un waypoint avec leurs commentaires et l'indication du 
+       waypoint auquel elles sont rattachées.</p>
+       - l'indice IBP n'est pas calculé car trop délicat à mettre en oeuvre.<br>
+    <strong>- Prévoir une batterie additionnelle ne sera pas un luxe inutile </strong>et sera même indispensable.
+
+    <p>
+- Sur la page d'accueil un bouton à bascule vous permet de choisir entre deux types de carte, 🌍 Open Street Map et 🗺️ Plan IGN, ce dernier étant le type par défaut.
+</p>
     </p>
 <center> ___________________________</center>
 <h2>Sommaire</h2>
@@ -167,7 +172,7 @@
 </p>
 
 
-<h2 id="cartes-hors-ligne"><u>1. Préparer les cartes hors ligne</u></h2>
+<h2 id="cartes-hors-ligne"><u>1. Eventuellement préparer les cartes hors ligne</u></h2>
 
 <p>
 Si vous devez effectuer une collecte dans une zone où la connexion Internet risque d'être absente ou insuffisante,
@@ -177,18 +182,18 @@ Cette préparation permet ensuite d'afficher le fond de carte IGN pendant la col
 
 <p>
 Depuis la page d'accueil, ouvrez la rubrique <strong>Cartes hors ligne</strong>.
-Deux méthodes vous sont proposées pour définir la zone à préparer.
+Deux méthodes vous sont proposées pour définir la zone à préparer :
 </p>
 
 <p>
-<strong>Méthode 1 : délimiter une zone avec un rectangle</strong><br>
+<strong>Première partie de la méthode 1 : délimiter une zone avec un rectangle</strong><br>
 Choisissez cette méthode si vous souhaitez préparer une zone géographique sans disposer d'un fichier GPX.
 - Sur la carte, dessinez un rectangle qui couvre le secteur dans lequel vous allez randonner.
 L'application utilise cette zone pour déterminer les cartes à télécharger.
 </p>
 <p>
 C'est assez simple à utiliser :<br>
-Pour définir la zone touchez le petit bouton
+- Pour définir la zone touchez le petit bouton
 <span class="icone-outil icone-rectangle"></span>
 à gauche et dessinez avec le doigt un carré correspondant
 à la surface que vous voulez télécharger. Puis, pour l'agrandir et/ou le positionner correctement,
@@ -196,26 +201,22 @@ touchez le bouton
 <span class="icone-outil icone-modifier"></span>
 qui va ajouter des repères aux angles de ce carré vous permettant de le redimensionner
 et un autre repère au centre pour le déplacer.
-Touchez ensuite sur "Save". 
-- Descendez en dessous de la carte et cochez le niveau de zoom
-que vous désirez - l'échelle 1/25 000, obligatoire, ne peut pas être déselectionnée,
-mais vous pouvez sélectionner ou supprimer des échelles plus petites
-(plus vous en sélectionnez, plus le nombre de tuiles va augmenter).
+Touchez ensuite sur "Save".<br> 
 </p>
 
 <p>
-<strong>Méthode 2 : préparer les cartes à partir d'un fichier GPX</strong><br>
+<strong>Première partie de la méthode 2 : préparer les cartes à partir d'un fichier GPX</strong><br>
 Choisissez cette méthode si vous disposez déjà de la trace GPX du circuit.
 - Chargez le fichier GPX : le parcours apparaît sur la carte et l'application détermine automatiquement
 un couloir de préparation de 300 mètres de chaque côté de la trace.
 Les cartes nécessaires à ce couloir seront sélectionnées pour le téléchargement.
+</p>
+<strong> Continuation commune aux 2 parties</strong>
+<p>
 - Descendez en dessous de la carte et cochez le niveau de zoom
 que vous désirez - par défaut l'échelle 1/25 000 est retenue,
 vous pouvez sélectionner ou supprimer des échelles plus petites
 (plus vous en sélectionnez, plus le nombre de tuiles va augmenter).
-</p>
-
-<p>
 <strong>Choisir les niveaux de zoom</strong><br>
 Les niveaux de zoom proposés vont de 14 à 18. Plus le niveau de zoom est élevé, plus la carte présente de détails,
 mais plus le nombre de cartes à télécharger et l'espace nécessaire peuvent augmenter.
@@ -236,49 +237,47 @@ C'est tout. Vous pouvez revenir à l'accueil puis passer dans les fenêtres de c
 <strong>Utiliser les cartes pendant la collecte</strong><br>
 Une fois les cartes téléchargées, vous pouvez vous rendre sur le terrain et utiliser CDSI69 sans connexion Internet.
 Pour afficher les cartes préparées, sélectionnez le fond de carte <strong>Plan IGN</strong> sur la page de collecte.
-Les cartes téléchargées sont conservées sur le téléphone pour une utilisation hors ligne.
+Les cartes téléchargées sont conservées sur le téléphone pour une utilisation hors ligne. Elles resteront également dans la mémoire du téléphone pour de 
+futures collectes.
 </p>
+<strong>Attention : Ces tuiles ne seront ajoutées que pour les collectes effectuées avec Plan IGN.</strong>
 
-<h2 id="commencer"><u>2. Commencer une collecte</u></h2>
+<h2 id="commencer"><u>2. Choix de la collecte</u></h2>
 
 <p>
 Au démarrage de CDSI69, trois possibilités vous sont proposées.
 </p>
 
 <p>
-<strong>Suivre un circuit existant</strong><br>
+<strong>- Suivre un circuit existant</strong><br>
 Choisissez cette option lorsque vous disposez déjà d'une trace au format GPX.
 Vous pourrez sélectionner le fichier GPX du circuit, puis effectuer la
 collecte en suivant cette trace. L'application vous indiquera alors en permanence 
 votre écart géographique par rapport à cette trace.
-</p>
-
-<p>
-<strong>Créer une nouvelle trace</strong><br>
+<br>
+<strong>- Créer une nouvelle trace</strong><br>
 Choisissez cette option lorsque vous ne disposez pas d'une trace GPX.
 CDSI69 enregistrera alors automatiquement votre parcours au fur et à mesure
 de votre progression.
-</p>
-
-<p>
-<strong>Reprendre une collecte</strong><br>
-Cette option permet de reprendre une collecte qui a été interrompue volontairement.
+<br>
+<strong>- Reprendre une collecte</strong><br>
+Cette option permet de reprendre une collecte qui a été interrompue.
 Sélectionnez le fichier <strong>.cdsi69</strong> ou le fichier
 <strong>.zip</strong> correspondant à la collecte à reprendre.
 </p>
 
 
 
-<h2 id="preparer"><u>3. Préparer et démarrer la collecte</u></h2>
+<h2 id="preparer"><u>3. Démarrer la collecte</u></h2>
 
 
 <p>
-Lorsque vous suivez un circuit existant, sélectionnez le fichier GPX
+<strong>- Lorsque vous suivez un circuit existant, </strong>sélectionnez le fichier GPX
 correspondant au parcours. La trace de celui-ci ne servira qu'à vous guider et n'aura aucun autre rôle dans la collecte.
 </p>
 
 <p>
-Lorsque vous créez une nouvelle trace, donnez un nom à cette trace.
+<strong>- Lorsque vous créez une nouvelle trace,</strong> donnez un nom à cette trace.
 </p>
 
 <p>
@@ -286,11 +285,11 @@ Après avoir choisi le fichier GPX à suivre ou avoir donné un nom à la nouvel
 L'écran suivant vous permet de remplir la partie "adminstrative" de votre collecte
 La saisie du nom des collecteurs est obligatoire. Ils ne sont pas saisissables par la dictée
 en raison de la complexité des orthographes possibles.
-La vitesse horaire de marche proposée est de 3,5 km/h pour le randonneur qui utilisera par la suite ce circuit. 
+La vitesse horaire de marche proposée est de 3,1 km/h pour le randonneur qui utilisera par la suite ce circuit. 
 Elle permettra à l'application de calculer le temps de marche. Vous pouvez modifier cette vitesse.
 </p>
 <p>
-Avant de commencer, attendez que le téléphone ait obtenu une position GPS.
+Avant de commencer, attendez que le téléphone ait obtenu une position GPS correcte.
 Une fois la collecte commencée, CDSI69 enregistre votre progression et permet
 de créer des waypoints aux endroits où vous souhaitez relever des informations.
 La fenêtre de la carte vous affiche en haut le nom de la collecte, 📍 le nombre de waypoints effectués,
@@ -303,9 +302,8 @@ et enfin 🔋 le pourcentage de batterie encore disponible.
 
 <p>
 Au cours de la collecte, créez un waypoint chaque fois qu'une information
-doit être relevée sur le terrain, par exemple lors d'un changement de
-cheminement, de balisage ou de signalétique.<br>
-Il est important de créer un waypoint à chaque changement de revêtement ou d'entrée et sortie d'agglo pour le calcul des cumuls.
+doit être relevée sur le terrain.<br>
+Il est important de créer un waypoint à chaque changement de revêtement ou d'entrée et sortie d'agglo pour le permettre le calcul automatique des cumuls.
 </p>
 
 <p>
@@ -378,7 +376,7 @@ notamment pour le calcul automatique des distances et des dénivelés.
 </p>
 
 
-<h2 id="photos"><u>5. Ajouter des photos et utiliser la dictée vocale</u></h2>
+<h2 id="photos"><u>5. Ajouter des photos</u></h2>
 
 <p>
 Un waypoint peut être complété par une ou plusieurs photos. Les photos
@@ -416,8 +414,8 @@ hormis le nom des collecteurs, pour des raisons d'orthographe des noms propres, 
 </p>
 
 <p>
-Une boite de dialogue permet, en cas de rectification d'un champ déjà renseigné, soit de resaisir la totalité
-de l'écriture, soit de continuer l'écriture du champs sans avoir besoin de tout resaisir.
+Une boite de dialogue permet, en cas de rectification d'un champ déjà renseigné, soit de ressaisir la totalité
+de l'écriture, soit de continuer l'écriture du champs sans avoir besoin de tout ressaisir.
 </p>
 
 <p>
@@ -433,7 +431,7 @@ l'écoute (si vous ne le faites pas, au bout de 5 secondes de silence, l'écoute
 </p>
 
 <p>
-Pendant l'écoute, le bouton indique que la reconnaissance vocale est en
+Pendant l'écoute, la couleur rouge du bouton indique que la reconnaissance vocale est en
 cours. Lorsque la dictée est terminée, le texte reconnu est inscrit dans le champ correspondant. 
 Suivant le modèle de téléphone et son système de reconnaissance vocale 
 le texte retranscrit peut présenter des surprises, notamment les noms propres, 
@@ -524,8 +522,8 @@ des éléments nécessaires pour retrouver et exploiter la collecte.
 <h2 id="conseils"><u>9. Conseils pratiques pour la collecte sur le terrain</u></h2>
 
 <p>
-Avant de partir, vérifiez que la batterie du téléphone est suffisamment
-chargée pour la durée prévue de la collecte. L'utilisation du GPS, de la
+Avant de partir, <strong>vérifiez que la batterie du téléphone est suffisamment
+chargée pour la durée prévue de la collecte.</strong> L'utilisation du GPS, de la
 carte et de l'appareil photo peut augmenter la consommation de batterie.
 </p>
 
@@ -588,9 +586,7 @@ L'objectif est de disposer, à la fin du parcours, d'une collecte complète
 contenant la trace, les informations relevées aux différents waypoints,
 les photos et les fichiers nécessaires à son exploitation ultérieure.
 </p>
-<p>
-Sur la page d'accueil un bouton à bascule vous permet de choisir entre deux types de carte, 🌍 Open Street Map et 🗺️ Plan IGN, ce dernier étant le type par défaut.
-</p>
+
 
 <button
     class="boutonFermer"
@@ -599,7 +595,7 @@ Sur la page d'accueil un bouton à bascule vous permet de choisir entre deux typ
     Fermer
 
 </button>
-<p> <i><small>Claude Frey - CDRP69 et Open AI ChatGPT</small><i></i></p>
+<p> <i><small>Claude Frey - CDRP69 et Open AI ChatGPT - Novembre 2026</small><i></i></p>
 </body>
 
 </html>

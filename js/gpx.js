@@ -176,7 +176,7 @@ function chargerTexteGPX(texteGPX) {
         ).value = distanceKm;
 */
         let tempsHeures =
-            distanceTotale / 1000 / 3.5;
+            distanceTotale / 1000 / 3.1;
 
         let heures =
             Math.floor(tempsHeures);
