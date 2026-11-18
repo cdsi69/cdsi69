@@ -76,6 +76,132 @@ let timerRecentrage = null;
 //-------------------------------------------------
 
 
+
+//-------------------------------------------------
+// BOUSSOLE : ROSE DES VENTS ET CAP
+// Correction initiale : +5° pour compenser le décalage constaté.
+//-------------------------------------------------
+
+let ecouteOrientationActive = false;
+let controleBoussole = null;
+let roseBoussole = null;
+let texteCapBoussole = null;
+const CORRECTION_BOUSSOLE = 5;
+
+function traiterOrientationBoussole(evenement) {
+
+    if (!evenement) return;
+
+    let cap = null;
+
+    // Safari iOS fournit directement le cap magnétique.
+    if (typeof evenement.webkitCompassHeading === "number") {
+        cap = evenement.webkitCompassHeading;
+    } else if (typeof evenement.alpha === "number") {
+        // Déduction utilisée par les navigateurs fournissant alpha.
+        cap = (360 - evenement.alpha) % 360;
+    }
+
+    if (cap === null || !Number.isFinite(cap)) return;
+
+    // Correction du décalage constaté : le cap affiché est corrigé de 5°.
+    cap = (cap - CORRECTION_BOUSSOLE + 360) % 360;
+
+    // La rose tourne sous le repère fixe situé en haut de la boussole.
+    if (roseBoussole) {
+        roseBoussole.style.transform = "rotate(" + (-cap) + "deg)";
+    }
+
+    if (texteCapBoussole) {
+        texteCapBoussole.textContent = String(Math.round(cap)).padStart(3, "0") + "°";
+    }
+}
+
+function demarrerBoussole() {
+
+    if (ecouteOrientationActive) return;
+
+    function ecouter() {
+        if (ecouteOrientationActive) return;
+
+        window.addEventListener("deviceorientation", traiterOrientationBoussole, true);
+        ecouteOrientationActive = true;
+    }
+
+    // iOS exige une autorisation explicite déclenchée par un geste de l'utilisateur.
+    if (typeof DeviceOrientationEvent !== "undefined" &&
+        typeof DeviceOrientationEvent.requestPermission === "function") {
+
+        DeviceOrientationEvent.requestPermission()
+            .then(function (autorisation) {
+                if (autorisation === "granted") {
+                    ecouter();
+                }
+            })
+            .catch(function () {
+                if (texteCapBoussole) texteCapBoussole.title = "Boussole indisponible ou autorisation refusée";
+            });
+
+    } else if ("DeviceOrientationEvent" in window) {
+        ecouter();
+    } else if (texteCapBoussole) {
+        texteCapBoussole.title = "Ce navigateur ne fournit pas de capteur de boussole";
+    }
+}
+
+function ajouterBoussole(carteCible) {
+
+    const controle = L.control({ position: "topright" });
+
+    controle.onAdd = function () {
+
+        const conteneur = L.DomUtil.create("div", "controle-boussole");
+
+        conteneur.innerHTML =
+            '<button type="button" class="bouton-boussole" ' +
+            'aria-label="Activer la boussole" title="Boussole – nord en haut lorsque le téléphone pointe au nord">' +
+                '<span class="boussole-repere" aria-hidden="true"></span>' +
+                '<svg class="boussole-svg" viewBox="0 0 100 100" role="img" aria-label="Rose des vents">' +
+                    '<g class="boussole-rose">' +
+                        '<circle cx="50" cy="50" r="43" class="boussole-cercle" />' +
+                        '<g class="boussole-graduations">' +
+                            '<path d="M50 7 V17 M93 50 H83 M50 93 V83 M7 50 H17 M80.4 19.6 L73.3 26.7 M80.4 80.4 L73.3 73.3 M19.6 80.4 L26.7 73.3 M19.6 19.6 L26.7 26.7" />' +
+                        '</g>' +
+                        '<path d="M50 12 L44 50 L50 45 L56 50 Z" class="boussole-nord-rouge" />' +
+                        '<path d="M50 88 L44 50 L50 55 L56 50 Z" class="boussole-sud" />' +
+                        '<text x="50" y="28" class="boussole-lettre boussole-lettre-nord">N</text>' +
+                        '<text x="73" y="54" class="boussole-lettre">E</text>' +
+                        '<text x="50" y="80" class="boussole-lettre">S</text>' +
+                        '<text x="27" y="54" class="boussole-lettre">O</text>' +
+                        '<circle cx="50" cy="50" r="3" class="boussole-centre" />' +
+                    '</g>' +
+                '</svg>' +
+                '<span class="boussole-cap">---°</span>' +
+            '</button>';
+
+        roseBoussole = conteneur.querySelector(".boussole-rose");
+        texteCapBoussole = conteneur.querySelector(".boussole-cap");
+
+        L.DomEvent.disableClickPropagation(conteneur);
+        L.DomEvent.disableScrollPropagation(conteneur);
+
+        L.DomEvent.on(conteneur.querySelector("button"), "click", function () {
+            demarrerBoussole();
+        });
+
+        return conteneur;
+    };
+
+    controle.addTo(carteCible);
+    controleBoussole = controle;
+
+    // Sur les appareils ne demandant pas d'autorisation, démarrage automatique.
+    if (!(typeof DeviceOrientationEvent !== "undefined" &&
+          typeof DeviceOrientationEvent.requestPermission === "function")) {
+        demarrerBoussole();
+    }
+}
+
 function initialiserCarte() {
 
     if (carteInitialisee) return;
@@ -149,6 +275,9 @@ carte.on("zoomend", verifierZoomHorsLigne);
 fondPlanIGN.addTo(carte);
 
 ajouterControleEchelle(carte);
+
+// Rose des vents : la carte reste orientée nord en haut.
+ajouterBoussole(carte);
 
 carteInitialisee = true;
 

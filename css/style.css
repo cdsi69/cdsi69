@@ -1740,3 +1740,110 @@ html {
 #btnSupprimerCartes:hover {
     background: #A52A2A;
 }
+
+
+/* =========================================
+   BOUSSOLE SUR LA CARTE DE COLLECTE
+   Rose des vents mobile sous un repère fixe
+   ========================================= */
+
+.controle-boussole {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.bouton-boussole {
+    position: relative;
+    width: 76px;
+    height: 91px;
+    padding: 3px 2px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid #666;
+    border-radius: 10px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+}
+
+.boussole-svg {
+    display: block;
+    width: 68px;
+    height: 68px;
+    overflow: visible;
+}
+
+.boussole-rose {
+    transform-origin: 50px 50px;
+    transition: transform 0.12s linear;
+}
+
+.boussole-cercle {
+    fill: #fff;
+    stroke: #555;
+    stroke-width: 1.6;
+}
+
+.boussole-graduations {
+    fill: none;
+    stroke: #555;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+}
+
+.boussole-nord-rouge {
+    fill: #c00000;
+    stroke: #8b0000;
+    stroke-width: 0.7;
+}
+
+.boussole-sud {
+    fill: #aeb4bb;
+    stroke: #666;
+    stroke-width: 0.7;
+}
+
+.boussole-lettre {
+    fill: #333;
+    font-size: 9px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: middle;
+}
+
+.boussole-lettre-nord {
+    fill: #b00000;
+    font-size: 10px;
+}
+
+.boussole-centre {
+    fill: #333;
+    stroke: #fff;
+    stroke-width: 0.8;
+}
+
+.boussole-repere {
+    position: absolute;
+    z-index: 2;
+    top: 1px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 10px solid #1f4e79;
+}
+
+.boussole-cap {
+    display: block;
+    color: #1f4e79;
+    font-size: 12px;
+    line-height: 15px;
+    font-weight: bold;
+    letter-spacing: 0.4px;
+}
