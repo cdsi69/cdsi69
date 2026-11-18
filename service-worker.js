@@ -1,7 +1,7 @@
 // CDSI69 - Service Worker
 // Version 1.0
 
-const CACHE_NAME = "cdsi69-v2-4";
+const CACHE_NAME = "cdsi69-v2-5";
 const CACHE_CARTES_NAME = "cdsi69-cartes-v1";
 
 const FICHIERS_A_METTRE_EN_CACHE = [

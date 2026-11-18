@@ -1687,3 +1687,56 @@ html {
     font-weight: normal;
 
 }
+
+/* =========================================
+   BOUTONS DE LA PAGE CARTES HORS CONNEXION
+   Présentation compacte, proche des boutons Enregistrer
+   ========================================= */
+
+#btnRetourCartes,
+#btnChoixGPX,
+#btnChoixManuel,
+#btnEstimerCartes,
+#btnTelechargerCartes,
+#btnSupprimerCartes {
+    display: inline-block;
+    width: auto;
+    min-height: 0;
+    padding: 7px 10px;
+    margin: 5px 4px 5px 0;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: white;
+    background: #1F4E79;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-sizing: border-box;
+    vertical-align: middle;
+    transition: background 0.2s;
+}
+
+#btnRetourCartes:hover,
+#btnChoixGPX:hover,
+#btnChoixManuel:hover,
+#btnEstimerCartes:hover,
+#btnTelechargerCartes:hover {
+    background: #2A6496;
+}
+
+/* Les deux boutons de choix restent côte à côte si la largeur le permet */
+#btnChoixGPX,
+#btnChoixManuel {
+    max-width: calc(50% - 8px);
+    white-space: normal;
+}
+
+/* Le bouton de suppression reste rouge, mais avec le même format compact */
+#btnSupprimerCartes {
+    background: #8B0000;
+    margin-top: 8px;
+}
+
+#btnSupprimerCartes:hover {
+    background: #A52A2A;
+}

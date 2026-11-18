@@ -263,6 +263,189 @@ const CLE_SAUVEGARDE_CARTES = "CDSI69_TelechargementCartes";
 let carteHorsLigneCentreeGPS = false;
 let fondIGNHorsLigne = null;
 
+// Fenêtre de confirmation personnalisée pour la suppression des cartes
+// (permet d'afficher les boutons « Oui » et « Non », contrairement à confirm()).
+function demanderConfirmationSuppressionCartes() {
+
+    return new Promise(function (resolve) {
+
+        const fond = document.createElement("div");
+        fond.id = "modalConfirmationSuppressionCartes";
+        fond.className = "modal";
+        fond.style.zIndex = "10000";
+
+        const contenu = document.createElement("div");
+        contenu.className = "modal-contenu";
+        contenu.style.maxWidth = "450px";
+
+        const titre = document.createElement("h2");
+        titre.textContent = "ATTENTION !";
+
+        const message = document.createElement("div");
+        message.textContent =
+            "Vous allez supprimer toutes les tuiles IGN mémorisées sur cet appareil.\n\n" +
+            "Elles ne seront plus disponibles hors connexion et devront être téléchargées à nouveau.\n\n" +
+            "Les collectes, les fichiers GPX, les waypoints et les paramètres de préparation ne seront pas supprimés.\n\n" +
+            "Voulez-vous continuer ?";
+        message.style.whiteSpace = "pre-line";
+        message.style.textAlign = "left";
+        message.style.lineHeight = "1.45";
+
+        const boutons = document.createElement("div");
+        boutons.className = "modal-boutons";
+        boutons.style.flexDirection = "row";
+        boutons.style.justifyContent = "center";
+        boutons.style.gap = "12px";
+
+        const boutonNon = document.createElement("button");
+        boutonNon.type = "button";
+        boutonNon.textContent = "Non";
+
+        const boutonOui = document.createElement("button");
+        boutonOui.type = "button";
+        boutonOui.textContent = "Oui";
+
+        [boutonNon, boutonOui].forEach(function (bouton) {
+            bouton.style.minWidth = "90px";
+            bouton.style.padding = "9px 18px";
+            bouton.style.border = "none";
+            bouton.style.borderRadius = "8px";
+            bouton.style.color = "white";
+            bouton.style.fontWeight = "bold";
+            bouton.style.fontSize = "1em";
+            bouton.style.cursor = "pointer";
+        });
+
+        boutonNon.style.background = "#5DADE2";
+        boutonOui.style.background = "#8B0000";
+
+        let reponseDonnee = false;
+
+        function terminer(reponse) {
+            if (reponseDonnee) return;
+            reponseDonnee = true;
+            fond.remove();
+            resolve(reponse);
+        }
+
+        boutonNon.addEventListener("click", function () {
+            terminer(false);
+        });
+
+        boutonOui.addEventListener("click", function () {
+            terminer(true);
+        });
+
+        boutons.appendChild(boutonNon);
+        boutons.appendChild(boutonOui);
+        contenu.appendChild(titre);
+        contenu.appendChild(message);
+        contenu.appendChild(boutons);
+        fond.appendChild(contenu);
+        document.body.appendChild(fond);
+
+    });
+}
+
+// Fenêtre de résultat après la suppression des cartes
+// Présentation identique à la fenêtre de confirmation Oui / Non.
+function afficherResultatSuppressionCartes(texte) {
+
+    const fond = document.createElement("div");
+    fond.className = "modal";
+    fond.style.zIndex = "10000";
+
+    const contenu = document.createElement("div");
+    contenu.className = "modal-contenu";
+    contenu.style.maxWidth = "450px";
+
+    const titre = document.createElement("h2");
+    titre.textContent = "Suppression terminée";
+
+    const message = document.createElement("div");
+    message.textContent = texte;
+    message.style.whiteSpace = "pre-line";
+    message.style.textAlign = "left";
+    message.style.lineHeight = "1.45";
+
+    const boutons = document.createElement("div");
+    boutons.className = "modal-boutons";
+    boutons.style.justifyContent = "center";
+
+    const boutonOK = document.createElement("button");
+    boutonOK.type = "button";
+    boutonOK.textContent = "OK";
+    boutonOK.style.minWidth = "90px";
+    boutonOK.style.padding = "9px 18px";
+    boutonOK.style.border = "none";
+    boutonOK.style.borderRadius = "8px";
+    boutonOK.style.color = "white";
+    boutonOK.style.fontWeight = "bold";
+    boutonOK.style.fontSize = "1em";
+    boutonOK.style.cursor = "pointer";
+    boutonOK.style.background = "#5DADE2";
+
+    boutonOK.addEventListener("click", function () {
+        fond.remove();
+    });
+
+    boutons.appendChild(boutonOK);
+    contenu.appendChild(titre);
+    contenu.appendChild(message);
+    contenu.appendChild(boutons);
+    fond.appendChild(contenu);
+    document.body.appendChild(fond);
+}
+
+// Fenêtre de résultat après la suppression des cartes
+// Présentation identique à la fenêtre de confirmation Oui / Non.
+function afficherResultatSuppressionCartes(texte) {
+    const fond = document.createElement("div");
+    fond.className = "modal";
+    fond.style.zIndex = "10000";
+
+    const contenu = document.createElement("div");
+    contenu.className = "modal-contenu";
+    contenu.style.maxWidth = "450px";
+
+    const titre = document.createElement("h2");
+    titre.textContent = "Suppression terminée";
+
+    const message = document.createElement("div");
+    message.textContent = texte;
+    message.style.whiteSpace = "pre-line";
+    message.style.textAlign = "left";
+    message.style.lineHeight = "1.45";
+
+    const boutons = document.createElement("div");
+    boutons.className = "modal-boutons";
+    boutons.style.justifyContent = "center";
+
+    const boutonOK = document.createElement("button");
+    boutonOK.type = "button";
+    boutonOK.textContent = "OK";
+    boutonOK.style.minWidth = "90px";
+    boutonOK.style.padding = "9px 18px";
+    boutonOK.style.border = "none";
+    boutonOK.style.borderRadius = "8px";
+    boutonOK.style.color = "white";
+    boutonOK.style.fontWeight = "bold";
+    boutonOK.style.fontSize = "1em";
+    boutonOK.style.cursor = "pointer";
+    boutonOK.style.background = "#5DADE2";
+
+    boutonOK.addEventListener("click", function () {
+        fond.remove();
+    });
+
+    boutons.appendChild(boutonOK);
+    contenu.appendChild(titre);
+    contenu.appendChild(message);
+    contenu.appendChild(boutons);
+    fond.appendChild(contenu);
+    document.body.appendChild(fond);
+}
+
 function initialiserCarteHorsLigne() {
 
         // Choix de la méthode de préparation des cartes
@@ -275,6 +458,61 @@ function initialiserCarteHorsLigne() {
 
     const importGPX =
         document.getElementById("importGPXHorsLigne");
+
+    // Suppression des seules tuiles cartographiques IGN mémorisées
+    const btnSupprimerCartes =
+        document.getElementById("btnSupprimerCartes");
+
+    if (btnSupprimerCartes) {
+        btnSupprimerCartes.addEventListener("click", async function () {
+
+            if (telechargementCartesEnCours) {
+                alert(
+                    "Impossible de supprimer les tuiles pendant un téléchargement. " +
+                    "Veuillez d'abord terminer ou mettre en pause le téléchargement."
+                );
+                return;
+            }
+
+            const confirmation = await demanderConfirmationSuppressionCartes();
+
+            if (!confirmation) {
+                return;
+            }
+
+            const affichage = document.getElementById("progressionCartes");
+
+            try {
+
+                const cacheExistant = await caches.open("cdsi69-cartes-v1");
+                const cles = await cacheExistant.keys();
+                const nombreTuiles = cles.length;
+
+                await caches.delete("cdsi69-cartes-v1");
+
+                if (affichage) {
+                    affichage.innerHTML =
+                        "<strong>Suppression terminée.</strong><br>" +
+                        nombreTuiles + " tuile(s) cartographique(s) supprimée(s).";
+                }
+
+                afficherResultatSuppressionCartes(
+                    nombreTuiles + " tuile(s) cartographique(s) supprimée(s)."
+                );
+
+            } catch (erreur) {
+
+                console.error("Erreur lors de la suppression des cartes :", erreur);
+
+                alert(
+                    "La suppression des cartes a échoué.\n\n" +
+                    "Détail : " + erreur.message
+                );
+
+            }
+
+        });
+    }
 
     btnChoixGPX.addEventListener("click", function () {
 
