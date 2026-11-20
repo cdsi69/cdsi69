@@ -86,7 +86,10 @@ let ecouteOrientationActive = false;
 let controleBoussole = null;
 let roseBoussole = null;
 let texteCapBoussole = null;
-const CORRECTION_BOUSSOLE = 5;
+
+// Utiliser la ligne ci-dessous pour corriger l'alignement de la boussole
+// Valeur positive = correction vers l'est ; valeur négative = correction vers l'ouest
+const CORRECTION_BOUSSOLE = 1;
 
 function traiterOrientationBoussole(evenement) {
 

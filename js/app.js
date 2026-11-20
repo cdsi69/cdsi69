@@ -148,7 +148,15 @@ async function activerVerrouEcran() {
 
         verrouEcran = nouveauVerrou;
 
-        nouveauVerrou.addEventListener("release", function() {
+        console.info(
+    "CDSI69 : maintien de l'écran ACTIVÉ."
+);
+
+               nouveauVerrou.addEventListener("release", function() {
+
+            console.warn(
+                "CDSI69 : le maintien de l'écran a été LIBÉRÉ."
+            );
 
             if (verrouEcran === nouveauVerrou) {
                 verrouEcran = null;
@@ -446,7 +454,7 @@ if (informationsCollecte.vitesse <= 0) {
 }
 
 
-function demarrerCollecte() {
+async function demarrerCollecte() {
 
     // =============================================
     // Vérification avant démarrage
@@ -484,7 +492,7 @@ function demarrerCollecte() {
     collecteActive = true;
 collecteEnCoursPourEcran = true;
 
-    activerVerrouEcran();
+    await activerVerrouEcran();
 
 
     // Changement d'écran
