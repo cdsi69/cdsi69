@@ -114,7 +114,7 @@ function mettreAJourPositionGPS(latitude, longitude) {
     }
 }
 
-function mettreAJourTraceCollecte(latitude, longitude, altitude) {
+function mettreAJourTraceCollecte(latitude, longitude, altitude, altitudePrecision) {
 
     // Ne rien enregistrer si aucune collecte n'est en cours
     if (!traceMarcheur) return;
@@ -126,11 +126,12 @@ function mettreAJourTraceCollecte(latitude, longitude, altitude) {
 
         dernierPointCollecte = pointActuel;
 
-        traceParcourue.push({
-            latitude: latitude,
-            longitude: longitude,
-            altitude: altitude
-        });
+       traceParcourue.push({
+    latitude: latitude,
+    longitude: longitude,
+    altitude: altitude,
+    altitudePrecision: altitudePrecision
+});
 
         traceMarcheur.setLatLngs([
             [latitude, longitude]
@@ -153,11 +154,12 @@ function mettreAJourTraceCollecte(latitude, longitude, altitude) {
     dernierPointCollecte = pointActuel;
 
     // Enregistrer exactement le même point dans la trace
-    traceParcourue.push({
-        latitude: latitude,
-        longitude: longitude,
-        altitude: altitude
-    });
+   traceParcourue.push({
+    latitude: latitude,
+    longitude: longitude,
+    altitude: altitude,
+    altitudePrecision: altitudePrecision
+});
 
     afficherDistanceCollecte();
 
@@ -390,7 +392,8 @@ mettreAJourPositionGPS(
 mettreAJourTraceCollecte(
     latitudeGPS,
     longitudeGPS,
-    altitudeGPS
+    altitudeGPS,
+    altitudePrecisionGPS
 );
 
         },

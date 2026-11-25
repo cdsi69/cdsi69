@@ -237,6 +237,20 @@ if (champEntrePas) {
     latitude: latitude,
     longitude: longitude,
     
+        // Altitude GPS au moment de la création du WP
+    altitude:
+        altitudeGPS != null &&
+        Number.isFinite(Number(altitudeGPS))
+            ? Number(altitudeGPS)
+            : null,
+
+    // Précision verticale annoncée par le GPS
+    altitudePrecision:
+        altitudePrecisionGPS != null &&
+        Number.isFinite(Number(altitudePrecisionGPS))
+            ? Number(altitudePrecisionGPS)
+            : null,
+    
     ecartGPX:
     Math.round(
         segmentInfo.distance

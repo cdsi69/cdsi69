@@ -113,7 +113,9 @@ const COLONNES_EXCEL = [
     "Entre deux",
     "Photos",
     "Latitude",
-    "Longitude"
+    "Longitude",
+    "Altitude (m)",
+    "Écart altitude (m)"
 ];
 let photoEnCours = null;
 let referencePhotoEnCours = "";
@@ -1053,8 +1055,18 @@ function calculerDenivele(trace) {
     let deniveleNegatif = 0;
 
     let altitudeReference = null;
+    let precisionReference = null;
 
     trace.forEach(function(point) {
+
+        // Vérifier l'altitude
+        if (
+            point.altitude === null ||
+            point.altitude === undefined ||
+            point.altitude === ""
+        ) {
+            return;
+        }
 
         const altitude = Number(point.altitude);
 
@@ -1062,29 +1074,61 @@ function calculerDenivele(trace) {
             return;
         }
 
+        // Récupérer la précision verticale
+        const precision =
+            point.altitudePrecision != null &&
+            Number.isFinite(Number(point.altitudePrecision))
+                ? Number(point.altitudePrecision)
+                : null;
+
+        // Première altitude exploitable
         if (altitudeReference === null) {
+
             altitudeReference = altitude;
+            precisionReference = precision;
+
             return;
         }
 
+        // Différence d'altitude
         const difference =
             altitude - altitudeReference;
 
-        if (Math.abs(difference) >= SEUIL_DENIVELE) {
+        // Seuil adapté à la précision des deux mesures
+        let seuil = SEUIL_DENIVELE;
+
+        if (precision !== null) {
+            seuil = Math.max(seuil, precision);
+        }
+
+        if (precisionReference !== null) {
+            seuil = Math.max(seuil, precisionReference);
+        }
+
+        // Ne retenir que les variations significatives
+        if (Math.abs(difference) >= seuil) {
 
             if (difference > 0) {
+
                 denivelePositif += difference;
+
             } else {
+
                 deniveleNegatif += Math.abs(difference);
+
             }
 
             altitudeReference = altitude;
-               }
+            precisionReference = precision;
+        }
+
     });
 
     return {
+
         denivelePositif: denivelePositif,
         deniveleNegatif: deniveleNegatif
+
     };
 }
 
@@ -1254,7 +1298,9 @@ if (
     Number.isFinite(Number(premierWP.longitude))
 ) {
     coordonneesGPSPremierWP =
-        "GPS WP" + premierWP.numero + " : " +
+      //  "GPS WP" + premierWP.numero + " : " +
+      //  "Position GPS de départ" + premierWP.numero + " : " +
+        "Position GPS de départ : " +
         Number(premierWP.latitude).toFixed(6) + ", " +
         Number(premierWP.longitude).toFixed(6);
 }
@@ -1275,7 +1321,7 @@ let distanceHorsAgglo = 0;
 let distanceRevetu = 0;
 let distanceNonRevetu = 0;
 
-collecte.waypoints.forEach(function (wp) {
+collecte.waypoints.forEach(function (wp, index) {
 
     if (wp.photos) {
 
@@ -1384,7 +1430,7 @@ donnees.push([
     "📊 SYNTHÈSE DE LA COLLECTE"
 ]);
 
-/* On remettra ce bloc pour affichage du dénivelé quand ça fonctionnera correctement.
+
 donnees.push([
     "Nombre de waypoints : " +
     collecte.waypoints.length,
@@ -1399,18 +1445,6 @@ donnees.push([
     " m / -" +
     stats.deniveleNegatif.toFixed(0) +
     " m"
-]);
-*/
-
-donnees.push([
-    "Nombre de waypoints : " +
-    collecte.waypoints.length,
-    "",
-    "",
-    "",
-    "",
-    "",
-    ""
 ]);
 
 const distanceKm = stats.distanceTotale / 1000;
@@ -1501,8 +1535,7 @@ donnees.push([]);
 
    donnees.push(COLONNES_EXCEL);
 
-collecte.waypoints.forEach(function (wp) {
-
+collecte.waypoints.forEach(function (wp, index) {
     // WP supprimé
     if (wp.supprime === true) {
 
@@ -1516,6 +1549,35 @@ collecte.waypoints.forEach(function (wp) {
     }
 
     // WP normal
+
+    // Altitude du WP
+const altitudeWP =
+    wp.altitude != null &&
+    Number.isFinite(Number(wp.altitude))
+        ? Number(wp.altitude)
+        : null;
+
+// Altitude du WP précédent
+const wpPrecedent =
+    index > 0
+        ? collecte.waypoints[index - 1]
+        : null;
+
+const altitudePrecedente =
+    wpPrecedent &&
+    wpPrecedent.supprime !== true &&
+    wpPrecedent.altitude != null &&
+    Number.isFinite(Number(wpPrecedent.altitude))
+        ? Number(wpPrecedent.altitude)
+        : null;
+
+// Écart d'altitude entre les deux WP
+const ecartAltitude =
+    altitudeWP !== null &&
+    altitudePrecedente !== null
+        ? Number((altitudeWP - altitudePrecedente).toFixed(1))
+        : "";
+
     donnees.push([
         wp.numero,
         wp.balisage === "Autre"
@@ -1561,11 +1623,18 @@ Number.isFinite(Number(wp.latitude))
     ? Number(Number(wp.latitude).toFixed(6))
     : "",
 
-        wp.longitude != null &&
+            wp.longitude != null &&
 String(wp.longitude).trim() !== "" &&
 Number.isFinite(Number(wp.longitude))
     ? Number(Number(wp.longitude).toFixed(6))
-    : ""
+    : "",
+
+        altitudeWP !== null
+            ? Number(altitudeWP.toFixed(1))
+            : "",
+
+        ecartAltitude
+
     ]);
 
 });     
@@ -1677,10 +1746,17 @@ const styleEnteteTableau = {
 // 2 -  APPLICATION DES STYLES
 // =====================================================
 
-ws["A1"].s = styleGrandTitre;
+if (ws["A1"]) {
+    ws["A1"].s = styleGrandTitre;
+}
 
-ws["A6"].s  = styleTitreBloc;
-ws["A13"].s = styleTitreBloc;
+if (ws["A6"]) {
+    ws["A6"].s = styleTitreBloc;
+}
+
+if (ws["A13"]) {
+    ws["A13"].s = styleTitreBloc;
+}
 ["A2","A3","A4","J2","J3","J4"].forEach(function(cellule){
 
     if (ws[cellule]) {
@@ -1706,7 +1782,7 @@ ws["A13"].s = styleTitreBloc;
 [
     "A15","B15","C15","D15","E15","F15",
     "G15","H15","I15","J15","K15","L15","M15",
-    "N15","O15"
+    "N15","O15","P15","Q15"
 ].forEach(function(cellule){
 
     if (ws[cellule]) {
@@ -1723,7 +1799,7 @@ for (let ligne = 16; ligne <= 15 + collecte.waypoints.length; ligne++) {
 
     if (ligne % 2 === 0) {
 
-        for (let colonne = 0; colonne <= 14; colonne++) {
+        for (let colonne = 0; colonne <= 16; colonne++) {
 
             const cellule = XLSX.utils.encode_cell({
                 r: ligne - 1,
@@ -1784,39 +1860,39 @@ ws["!merges"] = [
 
     // Informations générales
     { s:{r:1,c:0}, e:{r:1,c:7} },    // A2:H2
-    { s:{r:1,c:10}, e:{r:1,c:14} },  // K2:O2
+    { s:{r:1,c:10}, e:{r:1,c:16} },  // K2:O2
 
     { s:{r:2,c:0}, e:{r:2,c:7} },    // A3:H3
     { s:{r:2,c:8}, e:{r:2,c:9} },    // I3:J3
-    { s:{r:2,c:10}, e:{r:2,c:14} },  // K3:O3
+    { s:{r:2,c:10}, e:{r:2,c:16} },  // K3:O3
 
     { s:{r:3,c:0}, e:{r:3,c:7} },    // A4:H4
-    { s:{r:3,c:10}, e:{r:3,c:14} },  // K4:O4
+    { s:{r:3,c:10}, e:{r:3,c:16} },  // K4:O4
 
     // Synthèse
-    { s:{r:5,c:0}, e:{r:5,c:14} },   // A6:O6
+    { s:{r:5,c:0}, e:{r:5,c:16} },   // A6:O6
 
     { s:{r:6,c:0}, e:{r:6,c:6} },    // A7:G7
-    { s:{r:6,c:7}, e:{r:6,c:14} },   // H7:O7
+    { s:{r:6,c:7}, e:{r:6,c:16} },   // H7:O7
 
     { s:{r:7,c:0}, e:{r:7,c:6} },    // A8:G8
-    { s:{r:7,c:7}, e:{r:7,c:14} },   // H8:O8
+    { s:{r:7,c:7}, e:{r:7,c:16} },   // H8:O8
 
-    { s:{r:8,c:0}, e:{r:8,c:14} },   // A9:O9
+    { s:{r:8,c:0}, e:{r:8,c:16} },   // A9:O9
 
     { s:{r:9,c:0}, e:{r:9,c:6} },    // A10:G10
-    { s:{r:9,c:7}, e:{r:9,c:14} },   // H10:O10
+    { s:{r:9,c:7}, e:{r:9,c:16} },   // H10:O10
 
     { s:{r:10,c:0}, e:{r:10,c:6} },  // A11:G11
-    { s:{r:10,c:7}, e:{r:10,c:14} }, // H11:O11
+    { s:{r:10,c:7}, e:{r:10,c:16} }, // H11:O11
 
     // Titre du tableau
-    { s:{r:12,c:0}, e:{r:12,c:14} }, // A13:O13
+    { s:{r:12,c:0}, e:{r:12,c:16} }, // A13:O13
 
     // Lignes vides
-    { s:{r:4,c:0}, e:{r:4,c:14} },   // A5:O5
-    { s:{r:11,c:0}, e:{r:11,c:14} }, // A12:O12
-    { s:{r:13,c:0}, e:{r:13,c:14} }  // A14:O14
+    { s:{r:4,c:0}, e:{r:4,c:16} },   // A5:O5
+    { s:{r:11,c:0}, e:{r:11,c:16} }, // A12:O12
+    { s:{r:13,c:0}, e:{r:13,c:16} }  // A14:O14
 
 ];
 
@@ -1838,9 +1914,12 @@ ws["!cols"] = [
     { wch: 5 },   // K - PK
     { wch: 10 },   // L - Entre pas
     { wch: 40 },  // M - Photos
-    { wch: 13 },  // N - Latitude
-    { wch: 13 }   // O - Longitude
+     { wch: 13 },  // N - Latitude
+    { wch: 13 },  // O - Longitude
+    { wch: 13 },  // P - Altitude
+    { wch: 17 }   // Q - Écart altitude
 ];
+
 
     XLSX.utils.book_append_sheet(
         wb,

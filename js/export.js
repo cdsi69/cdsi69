@@ -91,6 +91,11 @@ function construireObjetCollecte() {
                 supprime: wp.supprime || false,
                 latitude: wp.latitude,
                 longitude: wp.longitude,
+
+                // Altitude et précision GPS
+                altitude: wp.altitude ?? null,
+                altitudePrecision: wp.altitudePrecision ?? null,
+
                 ecartGPX: wp.ecartGPX,
                 balisage: wp.balisage,
                 balisageAutre: wp.balisageAutre,
