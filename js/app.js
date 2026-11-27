@@ -1428,7 +1428,7 @@ donnees.push([
 // SYNTHÈSE
 // =====================================================
 
-donnees.push([]);
+//donnees.push([]);
 
 donnees.push([
     "📊 SYNTHÈSE DE LA COLLECTE"
