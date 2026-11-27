@@ -1398,7 +1398,8 @@ donnees.push([
     "",
     "",
     "",
-    coordonneesGPSPremierWP,
+    "",
+    //coordonneesGPSPremierWP,
     "",
     "Version : " +
     collecte.version
@@ -1418,6 +1419,9 @@ donnees.push([
     "",
     "Collecteurs : " +
     informationsCollecte.collecteurs
+]);
+donnees.push([
+    coordonneesGPSPremierWP,
 ]);
 
 // =====================================================
